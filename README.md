@@ -3,6 +3,8 @@ macfind
 
 A vendor name finder from the mac address.
 
+Thanks to MACVENDORS.COM for providing nice REST API.
+
 ## Requirement
 
 - Python2 or 3
@@ -23,18 +25,23 @@ For example,
 
 ## Usage
 
-    usage: macfind.py [-h] [-z] MAC_ADDR or update [MAC_ADDR or update ...]
+    usage: macfind.py [-h] [-z] STRING [STRING ...]
     
-    It finds a company name by the mac address specified. if you specify 'update'
-    as the mac_addr, it is going to update the OUI database taken from the IEEE
-    server.
+        It finds a company name by the mac address specified.
+        
+        If you specify 'update', it is going to update the OUI database taken
+        from the IEEE server.  It takes a few minutes.
+    
+        Usage example:
+            macfind (mac_addr)
+            macfind -z (mac_addr)
+            macfind update
     
     positional arguments:
-      MAC_ADDR or update  MAC address or update.
+      STRING      MAC address or update.
     
     optional arguments:
-      -h, --help          show this help message and exit
-      -z                  specify online mode. it's going to ask
-                          http://api.macvendors.com/.
+      -h, --help  show this help message and exit
+      -z          specify online mode. it's going to ask
+                  http://api.macvendors.com/.
 
-Thanks to MACVENDORS.COM for providing nice REST API.

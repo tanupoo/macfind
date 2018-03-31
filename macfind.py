@@ -13,23 +13,23 @@ url_server = "http://api.macvendors.com/"
 url_oui = "http://standards-oui.ieee.org/oui/oui.txt"
 db_file = os.path.dirname(os.path.abspath(__file__)) + "/oui.txt"
 
-'''
-Usage:
-    macfind mac_addr
-    macfind -z mac_addr
-    macfind update
-
-update: update the local database of OUI. other options are ignored.
-'''
-
-s_desc = """
-It finds a company name by the mac address specified. if you specify 'update' as
-the mac_addr, it is going to update the OUI database taken from the IEEE server.
-"""
-
 def parse_args():
-    p = argparse.ArgumentParser(description=s_desc)
-    p.add_argument("_rest_args", metavar="MAC_ADDR or update", nargs="+",
+    s_desc = """\
+    It finds a company name by the mac address specified.
+    
+    If you specify 'update', it is going to update the OUI database taken
+    from the IEEE server.  It takes a few minutes.
+
+    Usage example:
+        macfind (mac_addr)
+        macfind -z (mac_addr)
+        macfind update\
+    """
+
+    p = argparse.ArgumentParser(
+            formatter_class=argparse.RawDescriptionHelpFormatter,
+            description=s_desc)
+    p.add_argument("_rest_args", metavar="STRING", nargs="+",
                    help="MAC address or update.")
     p.add_argument("-z", action="store_true", dest="f_online",
                     help="specify online mode. it's going to ask %s." %
