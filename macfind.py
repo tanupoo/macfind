@@ -59,6 +59,14 @@ if opt.mac_addr == "update":
 
 ma = opt.mac_addr.replace(".","").replace(":","").replace("-","")
 ma = ma.replace(" ","")
+# only full IPv6 address is supported.
+if len(ma) == 32:
+    # looks an IPv6 address. takes the host address.
+    ma = ma[16:]
+if len(ma) == 16:
+    # looks the host address of the IPv6 address.
+    # inverts the universal bit.
+    ma = "{:02x}".format(int(ma[:2], 16)^0x02) + ma[2:6] + ma[10:]
 if len(ma) not in [6, 8, 10, 12]:
     raise ValueError("the length of the MAC address must be either 6, 8, 10, 12")
 ma = ("-".join(["%s%s"%(ma[i],ma[i+1]) for i in range(0,6,2)])).upper()
