@@ -23,6 +23,8 @@ For example,
     macfind ac:bc:32:ba:1c:9f
     macfind 'ac bc 32 ba 1c 9f'
 
+Additionally, it supports taking a MAC address from an IPv6 full address.
+
 ## Usage
 
     usage: macfind.py [-h] [-z] STRING [STRING ...]
