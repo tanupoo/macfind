@@ -1,7 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
-
-from __future__ import print_function
 
 import argparse
 import requests
@@ -68,9 +65,9 @@ def get_canonical_macaddr(mac_addr, enable_ipv6=False):
     else:
         return ma
 
-'''
+"""
 test code
-'''
+"""
 if __name__ == "__main__":
     s_desc = """\
     It finds a company name by the mac address specified.
