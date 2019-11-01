@@ -94,6 +94,19 @@ if __name__ == "__main__":
     opt = ap.parse_args()
     opt.mac_addr = " ".join(opt._rest_args)
 
+    if opt.mac_addr == "test":
+        test_lines = [
+            "ac-bc-32-ba-1c-9f",
+            "ac.bc.32.ba.1c.9f",
+            "acbc.32ba.1c9f",
+            "ac:bc:32:ba:1c:9f",
+            "ac bc 32 ba 1c 9f",
+            "ac bc 32",
+            ]
+        for v in test_lines:
+            print(v, "=>", macfind(v))
+        exit(0)
+
     if opt.mac_addr == "update":
         if os.path.exists(db_file):
             shutil.move(db_file, db_file + ".bak")
