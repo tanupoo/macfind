@@ -35,10 +35,11 @@ def macfind_offline(oui):
 
 def macfind(ma, online=False, enable_ipv6=False):
     oui = get_canonical_macaddr(ma, enable_ipv6)
+    x = bin(int(oui[:2],16))[2:].zfill(8)
     if online is True:
-        return macfind_online(oui)
+        return macfind_online(oui), x[6], x[7]
     else:
-        return macfind_offline(oui)
+        return macfind_offline(oui), x[6], x[7]
 
 def get_canonical_macaddr(mac_addr, enable_ipv6=False):
     """
@@ -102,6 +103,7 @@ if __name__ == "__main__":
             "ac:bc:32:ba:1c:9f",
             "ac bc 32 ba 1c 9f",
             "ac bc 32",
+            "7b12:e437:9c2c:fa76",
             ]
         for v in test_lines:
             print(v, "=>", macfind(v))
@@ -124,7 +126,11 @@ if __name__ == "__main__":
     print("Searching for", opt.mac_addr)
 
     ret = macfind(opt.mac_addr, online=opt.f_online)
-    if ret:
-        print(ret)
+    if ret[0]:
+        print(ret[0])
     else:
-        print("Not found")
+        print("Not found.")
+        if ret[1] == "1":
+            print("Local bit {}.".format(ret[1]))
+        if ret[2] == "1":
+            print("Group bit {}.".format(ret[2]))
