@@ -7,8 +7,18 @@ import os
 import sys
 
 url_server = "http://api.macvendors.com/"
-url_oui = "http://standards-oui.ieee.org/oui/oui.txt"
-db_file = os.path.dirname(os.path.abspath(__file__)) + "/oui.txt"
+oui_db = [
+    {
+        "id": "ieee",
+        "url": "http://standards-oui.ieee.org/oui/oui.txt",
+        "name": "oui.txt"
+    },
+    {
+        "id": "wireshark",
+        "url": "https://gitlab.com/wireshark/wireshark/-/raw/master/manuf",
+        "name": "wsk.txt"
+    }
+    ]
 
 def pick_oui_name(line):
     """
@@ -26,12 +36,34 @@ def macfind_online(oui):
     else:
         return ""
 
-def macfind_offline(oui):
+def macfind_offline_ieee(oui):
+    db_file = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                           oui_db[0]["name"])
     with open(db_file, "r") as f:
         for line in f:
             if oui == line[:8]:
                 return pick_oui_name(line)
-    return ""
+    return None
+
+def macfind_offline_wireshark(oui):
+    db_file = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                           oui_db[1]["name"])
+    oui = oui.replace("-",":")
+    with open(db_file, "r") as f:
+        for line in f:
+            if oui == line[:8]:
+                return pick_oui_name(line)
+    return None
+
+def macfind_offline(oui):
+    r = macfind_offline_ieee(oui)
+    if r is not None:
+        return r
+    r = macfind_offline_wireshark(oui)
+    if r is not None:
+        return r
+    else:
+        return ""
 
 def macfind(ma, online=False, enable_ipv6=False):
     oui = get_canonical_macaddr(ma, enable_ipv6)
@@ -43,7 +75,7 @@ def macfind(ma, online=False, enable_ipv6=False):
 
 def get_canonical_macaddr(mac_addr, enable_ipv6=False):
     """
-    return the OUI of xx-xx-xx style.
+    return the OUI of XX-XX-XX style.
     """
     ma = mac_addr.replace(".","").replace(":","").replace("-","")
     ma = ma.replace(" ","")
@@ -112,26 +144,30 @@ if __name__ == "__main__":
     if opt.mac_addr == "update":
         nb_count_prog = 1024000
         nb_count = 0
-        try:
-            r = requests.get(url_oui, stream=True, timeout=(3.0, 6.0))
-            if r.status_code == 200:
-                tmp_file = f"{db_file}.tmp"
-                with open(tmp_file, "wb") as f:
-                    for chunk in r:
-                        f.write(chunk)
-                        # progress bar
-                        nb_count += len(chunk)
-                        if nb_count > nb_count_prog:
-                            nb_count = 0
-                            sys.stdout.write(".")
-                            sys.stdout.flush()
-        except Exception as e:
-            raise
-        else:
-            if os.path.exists(db_file):
-                shutil.move(db_file, f"{db_file}.bak")
+        for url in oui_db:
+            db_file = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                                   url["name"])
+            db_url = url["url"]
+            try:
+                r = requests.get(db_url, stream=True, timeout=(3.0, 6.0))
+                if r.status_code == 200:
+                    tmp_file = f"{db_file}.tmp"
+                    with open(tmp_file, "wb") as f:
+                        for chunk in r:
+                            f.write(chunk)
+                            # progress bar
+                            nb_count += len(chunk)
+                            if nb_count > nb_count_prog:
+                                nb_count = 0
+                                sys.stdout.write(".")
+                                sys.stdout.flush()
+            except Exception as e:
+                raise
+            else:
+                if os.path.exists(db_file):
+                    shutil.move(db_file, f"{db_file}.bak")
                 shutil.move(tmp_file, db_file)
-            print("")
+                print("")
         exit(0)
 
     print("Searching for", opt.mac_addr)
