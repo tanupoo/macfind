@@ -110,17 +110,28 @@ if __name__ == "__main__":
         exit(0)
 
     if opt.mac_addr == "update":
-        if os.path.exists(db_file):
-            shutil.move(db_file, db_file + ".bak")
-        r = requests.get(url_oui, stream=True)
-        if r.status_code == 200:
-            with open(db_file, "wb") as f:
-                for chunk in r.iter_content(1024):
-                    f.write(chunk)
-                    # progress bar
-                    sys.stdout.write(".")
-                    sys.stdout.flush()
-        print("")
+        nb_count_prog = 1024000
+        nb_count = 0
+        try:
+            r = requests.get(url_oui, stream=True, timeout=(3.0, 6.0))
+            if r.status_code == 200:
+                tmp_file = f"{db_file}.tmp"
+                with open(tmp_file, "wb") as f:
+                    for chunk in r:
+                        f.write(chunk)
+                        # progress bar
+                        nb_count += len(chunk)
+                        if nb_count > nb_count_prog:
+                            nb_count = 0
+                            sys.stdout.write(".")
+                            sys.stdout.flush()
+        except Exception as e:
+            raise
+        else:
+            if os.path.exists(db_file):
+                shutil.move(db_file, f"{db_file}.bak")
+                shutil.move(tmp_file, db_file)
+            print("")
         exit(0)
 
     print("Searching for", opt.mac_addr)
